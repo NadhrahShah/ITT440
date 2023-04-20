@@ -1,0 +1,121 @@
+#include <stdio.h>
+
+#include <stdlib.h>
+
+#include <unistd.h>
+
+#include <signal.h>
+
+#include <errno.h>
+
+
+
+
+
+int i = 0;
+
+int pid;
+
+int pipe_fds[2];
+
+char msg[40];
+
+void sigint_handler(int sig);
+
+
+
+int main() 
+
+{
+
+    printf("Message to child: ");
+
+    fgets (msg, 40, stdin);
+
+    
+
+    for (int i = 0; i < 3; i++)
+
+    {
+
+        if (pipe(pipe_fds) == -1)
+
+        {
+
+            printf ("Error, pipe failed\n");
+
+            exit (1);
+
+        }
+
+        
+
+        pid = fork ();
+
+        
+
+        if (pid == -1)
+
+        {
+
+            printf ("Error, child process failed\n");
+
+            exit (1);
+
+        }
+
+        
+
+        else if (pid == 0)
+
+        {
+
+            close (pipe_fds[1]);
+
+            read (pipe_fds[0], msg, 40);
+
+            printf ("Child %d received: %s", i + 1, msg);
+
+            exit (0);
+
+        }
+
+        
+
+        else
+
+        {
+
+            close (pipe_fds[0]);
+
+            write (pipe_fds[1], msg, 40);
+
+            printf ("Parent %d wrote to child %d\n", getpid(), i + 1);
+
+        }
+
+
+
+	if (signal(SIGINT, sigint_handler) == SIG_ERR)
+
+	{
+
+		perror("signal");
+
+		exit(1);
+
+	}
+
+    }
+
+}
+
+
+
+void sigint_handler (int sig)
+
+        {
+
+            printf ("Process interrupted.\n");
+
+        }
