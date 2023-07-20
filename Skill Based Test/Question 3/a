@@ -1,0 +1,35 @@
+import socket
+
+def convert_to_atmosphere(pressure_in_bar):
+    # Conversion formula from bar to atmosphere
+    return pressure_in_bar * 0.986923
+
+def handle_client(client_socket):
+    # Receive data from the client
+    data = client_socket.recv(1024)
+    pressure_in_bar = float(data.decode())
+
+    # Convert the pressure to atmosphere
+    pressure_in_atm = convert_to_atmosphere(pressure_in_bar)
+
+    # Send the converted pressure back to the client
+    client_socket.send(str(pressure_in_atm).encode())
+
+    client_socket.close()
+
+def main():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(("0.0.0.0", 8080))
+    server_socket.listen(5)
+
+    print("Server is listening for connections...")
+
+    while True:
+        client_socket, address = server_socket.accept()
+        print(f"[*] Received connection from {address[0]}:{address[1]}")
+
+        client_handler = threading.Thread(target=handle_client, args=(client_socket,))
+        client_handler.start()
+
+if __name__ == "__main__":
+    main()
