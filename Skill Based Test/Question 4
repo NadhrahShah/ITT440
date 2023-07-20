@@ -1,0 +1,48 @@
+import socket
+import threading
+import random
+
+# List of quotes
+quotes = [
+    "Be yourself; everyone else is already taken. - Oscar Wilde",
+    "Two things are infinite: the universe and human stupidity; and I'm not sure about the universe. - Albert Einstein",
+    "You only live once, but if you do it right, once is enough. - Mae West",
+    "There is no sunrise so beautiful that it is worth waking me up to see it - Mindy Kaling",
+    "Life is what happens when you're busy making other plans. - John Lennon",
+    "In three words I can sum up everything I've learned about life: it goes on. - Robert Frost",
+    "My mother always used to say: The older you get, the better you get, unless you’re a banana - Rose (Betty White)",
+    "You miss 100% of the shots you don't take. - Wayne Gretzky",
+    "Before you marry a person, you should first make them use a computer with slow Internet to see who they really are - Will Ferrel",
+    "Someone asked me, if I were stranded on a desert island what book would I bring: ‘How to Build a Boat - Steven Wright"
+    "If I’m not back in five minutes, just wait longer - Ace Ventura"
+    "When I'm in social situations, I always hold onto my glass. It makes me feel comfortable and secure and I don't have to shake hands - Larry David"
+    "Never do anything out of hunger. Not even eating - Frank Semyon"
+
+]
+
+def handle_client(client_socket):
+    # Get a random quote
+    random_quote = random.choice(quotes)
+
+    # Send the quote to the client
+    client_socket.send(random_quote.encode())
+
+    # Close the client socket
+    client_socket.close()
+
+def main():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(("0.0.0.0", 8888))
+    server_socket.listen(5)
+
+    print("QOTD server is listening on port 8888...")
+
+    while True:
+        client_socket, address = server_socket.accept()
+        print(f"[*] Received connection from {address[0]}:{address[1]}")
+
+        client_handler = threading.Thread(target=handle_client, args=(client_socket,))
+        client_handler.start()
+
+if __name__ == "__main__":
+    main()
